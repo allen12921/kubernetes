@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kubesystem-ingress
+  namespace: kube-system
+  annotations:
+    nginx.org/rewrites: "serviceName=monitoring-grafana rewrite=/;serviceName=coffee-svc rewrite=/beans/"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /grafana
+        backend:
+          serviceName: monitoring-grafana 
+          servicePort: 80
+  tls:
+  - hosts:
+    - test.tokuapp.com
+    secretName: ssl-secret
