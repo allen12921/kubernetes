@@ -4,14 +4,14 @@ metadata:
   name: kubesystem-ingress
   namespace: kube-system
   annotations:
-    nginx.org/rewrites: "serviceName=monitoring-grafana rewrite=/;serviceName=coffee-svc rewrite=/beans/"
+    nginx.org/rewrites: "serviceName=kubernetes-dashboard rewrite=/;serviceName=coffee-svc rewrite=/beans/"
 spec:
   rules:
   - http:
       paths:
-      - path: /grafana
+      - path: /dashboard
         backend:
-          serviceName: monitoring-grafana 
+          serviceName: kubernetes-dashboard
           servicePort: 80
   tls:
   - hosts:

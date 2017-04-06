@@ -1,0 +1,7 @@
+install 
+
+
+
+
+kubeadm join --token 8fd088.79f9a3d7492c47b8 10.0.1.227:6443
+kubectl --namespace=kube-system scale deployment kube-dns --replicas=2
