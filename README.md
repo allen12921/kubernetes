@@ -5,4 +5,7 @@ ETCDCTL_API=3 ./etcdctl get / --prefix --keys-only
 
 
 To allow all server access proxy url
-kubectl proxy --address='0.0.0.0' --accept-hosts='^*$'
+kubectl proxy --address='0.0.0.0' --accept-hosts='^*$' . 
+
+By default the controller redirects (301) to HTTPS if TLS is enabled for that ingress . If you want to disable that behaviour globally, you can use ssl-redirect: "false" in the NGINX config map . 
+To configure this feature for specific ingress resources, you can use the ingress.kubernetes.io/ssl-redirect: "false" annotation in the particular resource.
