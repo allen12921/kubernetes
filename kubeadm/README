@@ -11,3 +11,16 @@ kubectl label node ozintel-docker01.lan beta.kubernetes.io/fluentd-ds-ready=true
 and delete below option from /etc/sysconfig/docker so that write container logs to json.log file and the kubelet can creates symlinks that
 capture the pod name, namespace, container name & Docker container ID to the docker logs for pods in the /var/log/containers
 --log-driver=journald
+
+Add below to  spec to allow assign pods on master   
+      tolerations:  
+            - effect: NoSchedule   
+              operator: Exists  
+              
+                
+Use nodeSelector   to assign pods on specified label nodes .       
+ kubectl label nodes ozintel-docker03.lan influxdb=true  
+ 
+ add below to  spec   
+ nodeSelector:  
+        influxdb: "true"  
