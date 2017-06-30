@@ -12,3 +12,21 @@ To configure this feature for specific ingress resources, you can use the ingres
 
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=nginxsvc/O=nginxsvc" . 
 kubectl create secret tls tls-secret --key tls.key --cert tls.crt . 
+
+
+use configmap for configuration . 
+kubectl create configmap influxdb-config --from-file=config.toml=influxdb.config.toml  -n kube-system  
+        volumeMounts:  
+        - mountPath: /data   
+          name: influxdb-storage . 
+        - mountPath: /etc/  
+          name: influxdb-config . 
+      nodeSelector:  
+          influxdb: "true" . 
+      volumes:  
+      - name: influxdb-storage . 
+        hostPath:   
+          path: /opt/influxdb . 
+      - name: influxdb-config . 
+        configMap:  
+         name: influxdb-config . 
