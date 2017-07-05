@@ -30,3 +30,49 @@ kubectl create configmap influxdb-config --from-file=config.toml=influxdb.config
       - name: influxdb-config . 
         configMap:  
          name: influxdb-config . 
+         
+use pv  
+1.define pv(it can be in any namespace)  
+apiVersion: v1  
+kind: PersistentVolume  
+metadata:  
+  name: nfs-defalut  
+spec:  
+  capacity:  
+    storage: 2Gi  
+  accessModes:  
+    - ReadWriteMany  
+  nfs:  
+    server: 192.168.168.8  
+    path: "/volume1/k8s"  
+    
+ 2.Binding pv by pvc  
+ PersistentVolumeClaim with a specific amount of storage requested and with certain access modes. A control loop in the master watches for new PVCs, finds a matching PV (if possible), and binds them together.Claims will remain unbound indefinitely if a matching volume does not exist. Claims will be bound as matching volumes become available. For example, a cluster provisioned with many 50Gi PVs would not match a PVC requesting 100Gi. The PVC can be bound when a 100Gi PV is added to the cluster.
+
+ ---  
+kind: PersistentVolumeClaim  
+apiVersion: v1  
+metadata:  
+  name: nfs  
+  namespace: kube-system  
+spec:  
+  accessModes:  
+    - ReadWriteMany  
+  resources:  
+    requests:  
+      storage: 1Gi  
+ 3.Using  
+ Pods use claims as volumes.  
+ Pods use claims as volumes. The cluster inspects the claim to find the bound volume and mounts that volume for a pod. For volumes which support multiple access modes, the user specifies which mode desired when using their claim as a volume in a pod.  
+       volumes:  
+       - name: influxdb-storage  
+         persistentVolumeClaim:  
+          claimName: nfs  
+ 4.Releasing  
+ When a user is done with their volume, they can delete the PVC objects from the API  
+ 5.Reclaiming  
+ The reclaim policy for a PersistentVolume tells the cluster what to do with the volume after it has been released of its claim. Currently, volumes can either be Retained, Recycled or Deleted.Retention allows for manual reclamation of the resource,deletion removes both the PersistentVolume object from Kubernetes, as well as deleting the associated storage asset in external infrastructure. Volumes that were dynamically provisioned are always deleted.
+ 6.Recycling  
+ If supported by appropriate volume plugin, recycling performs a basic scrub (rm -rf /thevolume/*) on the volume and makes it available again for a new claim.  
+ 
+
