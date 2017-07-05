@@ -37,7 +37,10 @@ apiVersion: v1
 kind: PersistentVolume  
 metadata:  
   name: nfs-defalut  
+  labels:
+     release: "stable"  
 spec:  
+  storageClassName: slow
   capacity:  
     storage: 2Gi  
   accessModes:  
@@ -45,8 +48,14 @@ spec:
   nfs:  
     server: 192.168.168.8  
     path: "/volume1/k8s"  
-    
- 2.Binding pv by pvc  
+ 
+ Class  
+ A PV can have a class, which is specified by setting the storageClassName attribute to the name of a StorageClass. A PV of a particular class can only be bound to PVCs requesting that class. A PV with no storageClassName has no class and can only be bound to PVCs that request no particular class.  
+ Mount Options  
+ A Kubernetes administrator can specify additional mount options for when a Persistent Volume is being mounted on a node.  
+ You can specify a mount option by using the annotation volume.beta.kubernetes.io/mount-options on your Persistent Volume.  
+ 
+ 2.Binding pv by pvc(create pnc in ns whihc your pod in)  
  PersistentVolumeClaim with a specific amount of storage requested and with certain access modes. A control loop in the master watches for new PVCs, finds a matching PV (if possible), and binds them together.Claims will remain unbound indefinitely if a matching volume does not exist. Claims will be bound as matching volumes become available. For example, a cluster provisioned with many 50Gi PVs would not match a PVC requesting 100Gi. The PVC can be bound when a 100Gi PV is added to the cluster.
 
  ---  
@@ -56,12 +65,21 @@ metadata:
   name: nfs  
   namespace: kube-system  
 spec:  
+  storageClassName: slow
   accessModes:  
     - ReadWriteMany  
   resources:  
     requests:  
       storage: 1Gi  
- 3.Using  
+  selector:  
+    matchLabels:  
+      release: "stable"   
+    matchExpressions:  
+      - {key: environment, operator: In, values: [dev]}  
+Claims can specify a label selector to further filter the set of volumes. Only the volumes whose labels match the selector can be bound to the claim. The selector can consist of two fields:  
+matchLabels - the volume must have a label with this value  
+matchExpressions - a list of requirements made by specifying key, list of values, and operator that relates the key and values. Valid operators include In, NotIn, Exists, and DoesNotExist.  
+3.Using  
  Pods use claims as volumes.  
  Pods use claims as volumes. The cluster inspects the claim to find the bound volume and mounts that volume for a pod. For volumes which support multiple access modes, the user specifies which mode desired when using their claim as a volume in a pod.  
        volumes:  
@@ -75,4 +93,15 @@ spec:
  6.Recycling  
  If supported by appropriate volume plugin, recycling performs a basic scrub (rm -rf /thevolume/*) on the volume and makes it available again for a new claim.  
  
+A Note on Namespaces  
+PersistentVolumes binds are exclusive, and since PersistentVolumeClaims are namespaced objects, mounting claims with “Many” modes (ROX, RWX) is only possible within one namespace.
 
+StorageClasses  
+Each StorageClass contains the fields provisioner and parameters, which are used when a PersistentVolume belonging to the class needs to be dynamically provisioned.  
+kind: StorageClass  
+apiVersion: storage.k8s.io/v1  
+metadata:  
+  name: standard  
+provisioner: kubernetes.io/aws-ebs  
+parameters:   
+  type: gp2  
