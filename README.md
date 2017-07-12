@@ -14,7 +14,7 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt
 kubectl create secret tls tls-secret --key tls.key --cert tls.crt . 
 
 
-#use configmap for configuration . 
+# use configmap for configuration . 
 kubectl create configmap influxdb-config --from-file=config.toml=influxdb.config.toml  -n kube-system  
         volumeMounts:  
         - mountPath: /data   
@@ -31,7 +31,7 @@ kubectl create configmap influxdb-config --from-file=config.toml=influxdb.config
         configMap:  
          name: influxdb-config . 
          
-#pull image from private registry
+# pull image from private registry
 1. create login key . 
 kubectl create secret docker-registry regsecret --docker-server=<your-registry-server> --docker-username=<your-name> --docker-password=<your-pword> --docker-email=testz@my.com  
 2. create pod use the key . 
@@ -45,7 +45,7 @@ spec:  
       image: <your-private-image>   
   imagePullSecrets:  
     - name: regsecret 
-#use pv  
+# use pv  
 1.define pv(it can be in any namespace)  
 apiVersion: v1  
 kind: PersistentVolume  
