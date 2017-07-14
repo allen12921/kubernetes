@@ -18,18 +18,18 @@ kubectl create secret tls tls-secret --key tls.key --cert tls.crt .
 kubectl create configmap influxdb-config --from-file=config.toml=influxdb.config.toml  -n kube-system  
         volumeMounts:  
         - mountPath: /data   
-          name: influxdb-storage . 
+          name: influxdb-storage 
         - mountPath: /etc/  
-          name: influxdb-config . 
+          name: influxdb-config  
       nodeSelector:  
-          influxdb: "true" . 
+          influxdb: "true"  
       volumes:  
-      - name: influxdb-storage . 
+      - name: influxdb-storage   
         hostPath:   
-          path: /opt/influxdb . 
-      - name: influxdb-config . 
+          path: /opt/influxdb   
+      - name: influxdb-config   
         configMap:  
-         name: influxdb-config . 
+         name: influxdb-config   
          
 # pull image from private registry
 1. create login key . 
@@ -119,3 +119,40 @@ metadata:
 provisioner: kubernetes.io/aws-ebs  
 parameters:   
   type: gp2  
+
+# export resources from kubernet cluster
+kubectl get --export -o=json ns | \
+jq '.items[] |
+	select(.metadata.name!="kube-system") |
+	select(.metadata.name!="default") |
+	del(.status,
+        .metadata.uid,
+        .metadata.selfLink,
+        .metadata.resourceVersion,
+        .metadata.creationTimestamp,
+        .metadata.generation
+    )' >./cluster-dump/ns.json
+    
+for ns in $(jq -r '.metadata.name' < ./cluster-dump/ns.json);do
+    echo "Namespace: $ns"
+    kubectl --namespace="${ns}" get --export -o=json svc,rc,secrets,ds | \
+    jq '.items[] |
+        select(.type!="kubernetes.io/service-account-token") |
+        del(
+            .spec.clusterIP,
+            .metadata.uid,
+            .metadata.selfLink,
+            .metadata.resourceVersion,
+            .metadata.creationTimestamp,
+            .metadata.generation,
+            .status,
+            .spec.template.spec.securityContext,
+            .spec.template.spec.dnsPolicy,
+            .spec.template.spec.terminationGracePeriodSeconds,
+            .spec.template.spec.restartPolicy
+        )' >> "./cluster-dump/cluster-dump.json"
+done
+Notice that pods and service tokens are explicitly omitted altogether, as they are inherently non-portable resources that are created and managed by other components.
+
+kubectl create -f cluster-dump/ns.json
+kubectl create -f cluster-dump/cluster-dump.json
