@@ -6,6 +6,30 @@ install
 kubeadm join --token 8fd088.79f9a3d7492c47b8 10.0.1.227:6443
 kubectl --namespace=kube-system scale deployment kube-dns --replicas=2
 
+to extend ectd to cluster:
+change /etc/kubernetes/manifests/etcd.yaml then kubelet will restart etcd pods if not then restart kubelet
+  - command:  
+    - etcd 
+    - --listen-client-urls=http://0.0.0.0:2379 
+    - --advertise-client-urls=http://192.168.168.41:2379  
+    - --listen-peer-urls=http://192.168.168.41:2380 
+    - --initial-advertise-peer-urls=http://192.168.168.41:2380  
+    - --initial-cluster="default=http://192.168.168.41:2380,ect2=http://192.168.168.42:2380"  
+    - --data-dir=/var/lib/etcd 
+    - --force-new-cluster 
+
+you can copy either the same etcd.yaml to other worker node same place and change ip also replace --force-new-cluster by  --initial-cluster-state and add --name
+  - command:  
+    - etcd  
+    - --name=ect2 
+    - --listen-client-urls=http://0.0.0.0:2379   
+    - --advertise-client-urls=http://192.168.168.42:2379    
+    - --listen-peer-urls=http://192.168.168.42:2380   
+    - --initial-advertise-peer-urls=http://192.168.168.42:2380    
+    - --initial-cluster="default=http://192.168.168.41:2380,ect2=http://192.168.168.42:2380"   
+    - --initial-cluster-state=existing  
+    - --data-dir=/var/lib/etcd  
+ 
 for fit fluentd-elasticsearch installation
 kubectl label node ozintel-docker01.lan beta.kubernetes.io/fluentd-ds-ready=true
 and delete below option from /etc/sysconfig/docker so that write container logs to json.log file and the kubelet can creates symlinks that
