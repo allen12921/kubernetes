@@ -39,7 +39,9 @@ you can copy either the same etcd.yaml to other worker node same place and chang
     - --initial-cluster-state=existing  
     - --data-dir=/var/lib/etcd  
  
- or directly start new ectd from other servers
+ or directly start new ectd from other servers sometime you may want add -strict-reconfig-check option. If this option is passed to etcd, etcd rejects reconfiguration requests if the number of started members will be less than a quorum of the reconfigured cluster.
+
+
  
 # for fit fluentd-elasticsearch installation
 kubectl label node ozintel-docker01.lan beta.kubernetes.io/fluentd-ds-ready=true
