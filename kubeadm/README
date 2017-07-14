@@ -21,6 +21,7 @@ change /etc/kubernetes/manifests/etcd.yaml then kubelet will restart etcd pods i
     - --listen-peer-urls=http://192.168.168.41:2380 
     - --initial-advertise-peer-urls=http://192.168.168.41:2380  
     - --initial-cluster="default=http://192.168.168.41:2380,ect2=http://192.168.168.42:2380"  
+    - --initial-cluster-token=mycluster
     - --data-dir=/var/lib/etcd 
     - --force-new-cluster 
 
@@ -30,7 +31,8 @@ you can copy either the same etcd.yaml to other worker node same place and chang
     - --name=ect2 
     - --listen-client-urls=http://0.0.0.0:2379   
     - --advertise-client-urls=http://192.168.168.42:2379    
-    - --listen-peer-urls=http://192.168.168.42:2380   
+    - --listen-peer-urls=http://192.168.168.42:2380
+    - --initial-cluster-token=mycluster
     - --initial-advertise-peer-urls=http://192.168.168.42:2380    
     - --initial-cluster="default=http://192.168.168.41:2380,ect2=http://192.168.168.42:2380"   
     - --initial-cluster-state=existing  
