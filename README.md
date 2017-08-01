@@ -157,3 +157,17 @@ Notice that pods and service tokens are explicitly omitted altogether, as they a
 
 kubectl create -f cluster-dump/ns.json
 kubectl create -f cluster-dump/cluster-dump.json
+
+# Apply Resource Quotas and Limits to namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-resources
+  namespace: default
+spec:
+  hard:
+    pods: "4"
+    requests.cpu: "1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi
