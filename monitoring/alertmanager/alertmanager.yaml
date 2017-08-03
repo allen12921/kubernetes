@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: alertmanager
+  name: alertmanager
+spec:
+  selector:
+    app: alertmanager
+  type: NodePort
+  ports:
+  - name: alertmanager
+    protocol: TCP
+    port: 9093
+    nodePort: 30903
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: alertmanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager
+  template:
+    metadata:
+      name: alertmanager
+      labels:
+        app: alertmanager
+    spec:
+      nodeSelector:
+          app1: alertmanager
+      imagePullSecrets:
+        - name: regsecret
+      containers:
+      - name: alertmanager
+        image: 192.168.168.21:8123/alertmanager:latest
+        args:
+          - '-storage.path=/alertmanager/altdata'
+          - '-config.file=/etc/alertmanager/alertmanager.yaml'
+        ports:
+        - name: web
+          containerPort: 9093
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/alertmanager
+        - name: data
+          mountPath: /alertmanager
+      volumes:
+      - name: config-volume
+        configMap:
+          name: alertmanager
+      - name: data
+        persistentVolumeClaim:
+           claimName: nfs
