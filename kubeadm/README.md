@@ -1,4 +1,4 @@
-#Install 
+# Install 
 
 kubeadm join --token 8fd088.79f9a3d7492c47b8 10.0.1.227:6443
 kubectl --namespace=kube-system scale deployment kube-dns --replicas=2
@@ -6,7 +6,7 @@ kubectl --namespace=kube-system scale deployment kube-dns --replicas=2
 By default, your cluster will not schedule pods on the master for security reasons, If you want to be able to schedule pods on the master,
 kubectl taint nodes --all node-role.kubernetes.io/master-
 
-#Tear down
+# Tear down
 kubectl drain <node name> --delete-local-data --force --ignore-daemonsets
 kubectl delete node <node name>
 Then, on the node being removed, reset all kubeadm installed state:
