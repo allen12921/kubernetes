@@ -1,4 +1,4 @@
-Install 
+#Install 
 
 kubeadm join --token 8fd088.79f9a3d7492c47b8 10.0.1.227:6443
 kubectl --namespace=kube-system scale deployment kube-dns --replicas=2
@@ -6,7 +6,7 @@ kubectl --namespace=kube-system scale deployment kube-dns --replicas=2
 By default, your cluster will not schedule pods on the master for security reasons, If you want to be able to schedule pods on the master,
 kubectl taint nodes --all node-role.kubernetes.io/master-
 
-Tear down
+#Tear down
 kubectl drain <node name> --delete-local-data --force --ignore-daemonsets
 kubectl delete node <node name>
 Then, on the node being removed, reset all kubeadm installed state:
@@ -29,7 +29,7 @@ change /etc/kubernetes/manifests/etcd.yaml then kubelet will restart etcd pods t
     - --initial-cluster-token=mycluster
     - --data-dir=/var/lib/etcd 
     - --initial-cluster-state=new
- #   - --force-new-cluster (if you etcd data was copied from other cluster then enable this at the first start time)
+ ##- --force-new-cluster (if you etcd data was copied from other cluster then enable this at the first start time)
 
 you can copy either the same etcd.yaml to other worker node same place and change ip also replace --initial-cluster-state and add --name
   - command:  
