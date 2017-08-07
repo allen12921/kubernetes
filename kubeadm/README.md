@@ -12,7 +12,12 @@ kubectl delete node <node name>
 Then, on the node being removed, reset all kubeadm installed state:
 kubeadm reset
 
-to extend ectd to cluster:
+
+Force delete:
+kubectl delete pod NAME --grace-period=0 --force
+
+
+# to extend ectd to cluster:
 change /etc/kubernetes/manifests/etcd.yaml then kubelet will restart etcd pods then restart kubelet
   - command:  
     - etcd 
