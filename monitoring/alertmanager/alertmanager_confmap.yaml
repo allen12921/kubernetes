@@ -15,14 +15,26 @@ data:
     route:
       #receiver: 'slack'
       receiver: 'team-X-hipchat'
-      group_by: [namespace]
+      group_by: [label_k8s_app]
       group_wait: 1m
       group_interval: 5m 
       routes:
       # All alerts with service=mysql or service=cassandra
       # are dispatched to the database pager.
       - receiver: 'team-X-hipchat'
+      # How long to initially wait to send a notification for a group
+      # of alerts. Allows to wait for an inhibiting alert to arrive or collect
+      # more initial alerts for the same group. (Usually ~0s to few minutes.)
         group_wait: 10s
+      # How long to wait before sending a notification about new alerts that
+      # are added to a group of alerts for which an initial notification has
+      # already been sent. (Usually ~5min or more.)
+        group_interval: 10m
+      # How long to wait before sending a notification again if it has already
+      # been sent successfully for an alert. (Usually ~3h or more).
+        repeat_interval: 10h
+      # Whether an alert should continue matching subsequent sibling nodes.
+        continue: true
         match_re:
           service: mysql|cassandra
       # All alerts with the team=frontend label match this sub-route.
@@ -32,6 +44,17 @@ data:
         group_by: [product, environment]
         match:
           team: frontend
+    # # Inhibition rules allow to mute a set of alerts given that another alert is
+    # # firing.
+    # # We use this to mute any warning-level notifications if the same alert is
+    # # already critical.
+    inhibit_rules:
+      - source_match:
+          severity: 'critical'
+        target_match:
+          severity: 'warning'
+        # Apply inhibition if the alertname is the same.
+        equal: ['alertname', 'service']
     receivers:
     #    - name: 'slack'
     #      slack_configs:
@@ -46,6 +69,11 @@ data:
           message_format: html
           notify: true
           send_resolved: true
+          #from: '{{ template "hipchat.default.message" . }}'
+          # message: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
+          ##Whether this message should trigger a user notification.
+          notify: false
+          color: '{{ if eq .Status "firing" }}red{{ else }}green{{ end }}'
 kind: ConfigMap
 metadata:
   name: alertmanager
