@@ -70,7 +70,7 @@ spec:
  A Kubernetes administrator can specify additional mount options for when a Persistent Volume is being mounted on a node.  
  You can specify a mount option by using the annotation volume.beta.kubernetes.io/mount-options on your Persistent Volume.  
  
- 2.Binding pv by pvc(create pnc in ns whihc your pod in)  
+ 2.Binding pv by pvc(create pvc in ns which your pod in)  
  PersistentVolumeClaim with a specific amount of storage requested and with certain access modes. A control loop in the master watches for new PVCs, finds a matching PV (if possible), and binds them together.Claims will remain unbound indefinitely if a matching volume does not exist. Claims will be bound as matching volumes become available. For example, a cluster provisioned with many 50Gi PVs would not match a PVC requesting 100Gi. The PVC can be bound when a 100Gi PV is added to the cluster.
 
  ---  
